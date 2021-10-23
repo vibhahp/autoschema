@@ -5,10 +5,6 @@ import re
 app =Flask(__name__)
 
 @app.route('/')
-def hello():
-    return 'hello world'
-
-@app.route('/index')
 def home_page():
     return render_template('home.html')
 
