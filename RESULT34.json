@@ -1,0 +1,276 @@
+{
+  "parser_settings": {
+    "version": "omni.2.0",
+    "file_format_type": "delimited"
+  },
+  "file_declaration": {
+    "delimiter": ",",
+    "data_row_index": 2,
+    "columns": [
+      {
+        "name": "tracking_number"
+      },
+      {
+        "name": "1"
+      },
+      {
+        "name": "2"
+      },
+      {
+        "name": "statusdescription"
+      },
+      {
+        "name": "statuscode"
+      },
+      {
+        "name": "eventDateTime"
+      },
+      {
+        "name": "edd"
+      },
+      {
+        "name": "7"
+      }
+    ]
+  },
+  "transform_declarations": {
+    "retailer_template": {
+      "custom_func": {
+        "name": "lower",
+        "args": [
+          {
+            "custom_func": {
+              "name": "external",
+              "args": [
+                {
+                  "const": "retailer"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "carrier_template": {
+      "const": "cdl"
+    },
+    "carrier_status_code_template": {
+      "custom_func": {
+        "name": "upper",
+        "args": [
+          {
+            "custom_func": {
+              "name": "replace",
+              "args": [
+                {
+                  "xpath": "statuscode",
+                  "_comment": "event code"
+                },
+                {
+                  "const": "[[:punct:]]|\\s+",
+                  "_comment": "regex exp to match"
+                },
+                {
+                  "const": "",
+                  "_comment": "string to replace"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "event_date_time": {
+      "custom_func": {
+        "name": "dateTimeWithLayoutToRfc3339",
+        "args": [
+          {
+            "xpath": "eventDateTime",
+            "_comment": "event date time given by carrier"
+          },
+          {
+            "const": "01/02/2006  15:04:05 PM",
+            "_comment": "input layout"
+          },
+          {
+            "const": "false",
+            "_comment": "input layout has Tz(true/or false)??"
+          },
+          {
+            "const": "",
+            "_comment": "input timezone"
+          },
+          {
+            "const": "",
+            "_comment": "output timezone"
+          }
+        ]
+      }
+    },
+    "FINAL_OUTPUT": {
+      "object": {
+        "meta_info": {
+          "object": {
+            "retailer_moniker": {
+              "template": "retailer_template"
+            },
+            "message_source_type": {
+              "const": "FTP_FILE"
+            },
+            "message_source": {
+              "const": "carrier_flat_file"
+            },
+            "message_type": {
+              "const": "CARRIER_DATA"
+            },
+            "message_source_date": {
+              "external": "message_source_date"
+            },
+            "message_source_location": {
+              "custom_func": {
+                "name": "external",
+                "args": [
+                  {
+                    "const": "source_filename"
+                  }
+                ]
+              }
+            },
+            "message_origin": {
+              "const": "generic_file_processor"
+            }
+          }
+        },
+        "tracking_entity": {
+          "object": {
+            "carrier": {
+              "template": "carrier_template"
+            },
+            "retailer": {
+              "template": "retailer_template"
+            },
+            "tracking_number": {
+              "xpath": "tracking_number"
+            },
+            "tracking_document": {
+              "object": {
+                "carrier_moniker": {
+                  "template": "carrier_template"
+                },
+                "retailer_moniker": {
+                  "template": "retailer_template"
+                },
+                "tracking_number": {
+                  "xpath": "tracking_number"
+                },
+                "delivery": {
+                  "object": {
+                    "edd_begin": {
+                      "custom_func": {
+                        "name": "dateTimeWithLayoutToRfc3339",
+                        "args": [
+                          {
+                            "xpath": "edd"
+                          },
+                          {
+                            "const": "01/02/2006",
+                            "_comment": "input layout"
+                          },
+                          {
+                            "const": "false",
+                            "_comment": "input layout has timezone included or not"
+                          },
+                          {
+                            "const": "",
+                            "_comment": "input timezone"
+                          },
+                          {
+                            "const": "",
+                            "_comment": "output timezone"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "events": {
+                  "array": [
+                    {
+                      "object": {
+                        "date": {
+                          "template": "event_date_time"
+                        },
+                        "date_raw": {
+                          "template": "event_date_time"
+                        },
+                        "desc": {
+                          "xpath": "statusdescription"
+                        },
+                        "carrier_status_code": {
+                          "template": "carrier_status_code_template"
+                        },
+                        "event_status_code_mapping": {
+                          "object": {
+                            "event_code": {
+                              "custom_func": {
+                                "name": "getStatusCode",
+                                "args": [
+                                  {
+                                    "template": "carrier_template",
+                                    "_comment": "carrier"
+                                  },
+                                  {
+                                    "const": "",
+                                    "_comment": "service code"
+                                  },
+                                  {
+                                    "template": "carrier_status_code_template",
+                                    "_comment": "event code"
+                                  },
+                                  {
+                                    "const": "",
+                                    "_comment": "event desc"
+                                  },
+                                  {
+                                    "const": "",
+                                    "_comment": "error code"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "location": {
+                          "object": {
+                            "city": {
+                              "xpath": "event_city"
+                            },
+                            "state": {
+                              "xpath": "event_state"
+                            },
+                            "zip": {
+                              "xpath": "event_zip"
+                            },
+                            "country": {
+                              "xpath": "event_country_code"
+                            },
+                            "lng": {
+                              "xpath": "long"
+                            },
+                            "lat": {
+                              "xpath": "lat"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

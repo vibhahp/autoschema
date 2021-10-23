@@ -1,0 +1,3 @@
+columns,Header Exists,delimiter,eventDateTime,statuscode,statusdescription,location,tracking_number,carrier_name,edd,event_city,event_state,event_country_code,event_zip,eventdate,eventtime,long,lat
+8,TRUE,",",6,5,4,,1,,7,,,,,,,,
+,,,01/02/2006  15:04:05 PM,,,,,cdl,01/02/2006,,,,,,,,
