@@ -13,6 +13,17 @@
            <input type='number' name='g' required='required'/>
            <input type='number' name='h' required='required'/>-->
            <input type='file' name='file' required='required'>
+        <!-- <input type='radio' name='type_of_file' value='csv'></form>input>-->
+        <br><br>
+        File Type:&nbsp;&nbsp;
+        <select name="schematype" id="schematype">
+            <option value="csv">CSV</option>
+            <option value="xml">XML</option>
+            <option value="fixedlength">Fixed Length</option>
+            
+          </select>
+          <br>
+          <br>
            <button type='submit'>Generate schema</button>
            </form>
     </body>
